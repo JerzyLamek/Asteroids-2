@@ -5,8 +5,8 @@ from pygame.mask import from_surface
 import math
 
 class Settings(object):
-    window_height = 690
-    window_width = 1060
+    window_height = 900
+    window_width = 1200
     path_file = os.path.dirname(os.path.abspath(__file__))
     path_image = os.path.join(path_file, "images")
     title = "Raumschiff (Rotation und Bewegung"
@@ -82,6 +82,7 @@ class Game(object):
             self.spaceship.rotate_left()
         if pressed[pygame.K_d]:
             self.spaceship.rotate_right()
+            
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
