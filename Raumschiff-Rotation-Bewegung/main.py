@@ -2,19 +2,16 @@ import pygame
 import os
 from random import randint, randrange, uniform
 from pygame.mask import from_surface
+import math
 
 class Settings(object):
     window_height = 690
     window_width = 1060
     path_file = os.path.dirname(os.path.abspath(__file__))
     path_image = os.path.join(path_file, "images")
-    #path_sound = os.path.join(path_file, "sound")
     title = "Raumschiff (Rotation und Bewegung"
 
     spaceship_size = (80, 50)
-    spaceship_st_rotation = 0
-    spaceship_rotation = 22
-
 
 class Background(pygame.sprite.Sprite):
     def __init__(self, filename):
@@ -35,26 +32,29 @@ class Spaceship(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.left = (Settings.window_width // 2) - self.rect.width // 2
         self.rect.top = (Settings.window_height // 2) - self.rect.height // 2
+
+        self.rotation = 0
     
     def update(self):
         pass
 
     def rotate_left(self):
-        self.image = pygame.transform.rotate(self.image, Settings.spaceship_st_rotation + Settings.spaceship_rotation)
+        self.rotation += 22.5
+        center = self.rect.center 
+        self.image = pygame.transform.rotate(self.image, self.rotation)
         self.rect = self.image.get_rect()
-        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.center = center
 
     def rotate_right(self):
-        self.image = pygame.transform.rotate(self.image, Settings.spaceship_st_rotation + Settings.spaceship_rotation)
+        self.rotation -= 22.5
+        center = self.rect.center 
+        self.image = pygame.transform.rotate(self.image, self.rotation)
         self.rect = self.image.get_rect()
-        #self.center = 
-        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.center = center
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
 
-    
-    
 class Game(object):
     def __init__(self):
         super().__init__()
@@ -88,21 +88,17 @@ class Game(object):
                     self.running = False
                 if event.key == pygame.K_p:
                     self.pause = not self.pause
-
                 if event.key == pygame.K_k:
                     self.spaceship.rotate_left()
                 if event.key == pygame.K_l:
                     self.spaceship.rotate_right()
-
-
+                
     def update(self):
         self.spaceship.update()
-        #self.rock.update()
 
     def draw(self):
         self.background.draw(self.screen)
         self.spaceship.draw(self.screen)
-        #self.rock.draw(self.screen)
         pygame.display.flip()
     
 if __name__ == "__main__":
