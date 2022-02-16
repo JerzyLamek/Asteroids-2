@@ -161,7 +161,7 @@ class Game(object):
         self.asteroids = pygame.sprite.Group()
 
         self.running = True
-
+        
         self.timer_bullet = Timer(3000, False)
 
     def spawn_asteroids(self):
@@ -175,17 +175,14 @@ class Game(object):
             self.draw()
             self.update()
             self.spawn_asteroids()
-
         pygame.quit()
 
     def watch_for_events(self):
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_RIGHT]:
             self.spaceship.sprite.rotate_right()
-
         if pressed[pygame.K_LEFT]:
             self.spaceship.sprite.rotate_left()
-        
         if pressed[pygame.K_UP]:
             self.spaceship.sprite.move()
             
