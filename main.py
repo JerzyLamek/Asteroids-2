@@ -16,7 +16,7 @@ class Settings(object):
     asteroid_size = (50, 50)
     asteroid_speed = (-5, 5)
 
-class Background(pygame.sprite.Sprite):
+class Background(pygame.sprite.DirtySprite):
     def __init__(self, filename):
         super().__init__()
         self.image = pygame.image.load(os.path.join(Settings.path_image, filename)).convert_alpha()
@@ -26,7 +26,7 @@ class Background(pygame.sprite.Sprite):
     def draw(self, screen):
         screen.blit(self.image, self.rect)
 
-class Spaceship(pygame.sprite.Sprite):
+class Spaceship(pygame.sprite.DirtySprite):
     def __init__(self, filename):
         super().__init__()
         self.image = pygame.image.load(os.path.join(Settings.path_image, filename)).convert_alpha()
@@ -49,6 +49,8 @@ class Spaceship(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = center
 
+        self.has_changed = True
+
     def rotate_right(self):
         self.rotation -= 5
         center = self.rect.center 
@@ -70,6 +72,8 @@ class Spaceship(pygame.sprite.Sprite):
 
     def speed_up(self):
         self.rect.move_ip(self.speed_x, self.speed_y)
+
+        self.has_changed = True
 
     def border(self):
         if self.rect.left >= Settings.window_width:
@@ -94,7 +98,7 @@ class Spaceship(pygame.sprite.Sprite):
     def draw(self, screen):
         screen.blit(self.image, self.rect)
 
-class Asteroid(pygame.sprite.Sprite):
+class Asteroid(pygame.sprite.LayeredSprite):
     def __init__(self, filename):
         super().__init__()
         self.image = pygame.image.load(os.path.join(Settings.path_image, filename)).convert_alpha()
@@ -181,6 +185,7 @@ class Game(object):
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_RIGHT]:
             self.spaceship.sprite.rotate_right()
+
         if pressed[pygame.K_LEFT]:
             self.spaceship.sprite.rotate_left()
         if pressed[pygame.K_UP]:
