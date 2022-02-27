@@ -1,3 +1,4 @@
+from tkinter import CENTER
 import pygame
 import os
 from random import randint
@@ -37,6 +38,8 @@ class Spaceship(pygame.sprite.DirtySprite):
         self.rect.left = (Settings.window_width // 2) - self.rect.width // 2
         self.rect.top = (Settings.window_height // 2) - self.rect.height // 2
 
+        self.bullets = pygame.sprite.Group()
+
         self.rotation = 0
         self.speed_x = 0
         self.speed_y = 0
@@ -48,8 +51,6 @@ class Spaceship(pygame.sprite.DirtySprite):
         self.image = pygame.transform.rotate(self.image, self.rotation)
         self.rect = self.image.get_rect()
         self.rect.center = center
-
-        self.has_changed = True
 
     def rotate_right(self):
         self.rotation -= 5
@@ -73,8 +74,6 @@ class Spaceship(pygame.sprite.DirtySprite):
     def speed_up(self):
         self.rect.move_ip(self.speed_x, self.speed_y)
 
-        self.has_changed = True
-
     def border(self):
         if self.rect.left >= Settings.window_width:
             self.rect.left = 0
@@ -90,15 +89,61 @@ class Spaceship(pygame.sprite.DirtySprite):
             game.running = False
             print('Spaceship hat einen Asteroiden berührt!')
 
+    def shoot(self):
+        self.bullets.add(Bullet("5.png", self.rect.center, self.rotation))
+
     def update(self):
         self.speed_up()
         self.border()
         self.collision()
+
+        self.bullets.update()
     
     def draw(self, screen):
         screen.blit(self.image, self.rect)
+        self.bullets.draw(screen)
 
-class Asteroid(pygame.sprite.LayeredSprite):
+class Bullet(pygame.sprite.DirtySprite):
+    def __init__(self, filename, center, rotation):
+        super().__init__()
+        self.image = pygame.image.load(os.path.join(Settings.path_image, filename)).convert_alpha()
+        self.image = pygame.transform.scale(self.image, Settings.spaceship_size)
+        self.rect = self.image.get_rect()
+        self.copy_image = self.image
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.center = center
+
+        self.timer_bullet = Timer(5000, False)
+
+        self.rotation_value = rotation
+        self.speed_x = 0
+        self.speed_y = 0
+
+        self.rotation(center)
+
+    def rotation(self, center):
+        rotation_value = radians(self.rotation_value)
+
+        self.new_speed_x = self.speed_x - sin(rotation_value)
+        self.new_speed_y = self.speed_y - cos(rotation_value)
+
+        self.image = pygame.transform.rotate(self.image, self.rotation_value)
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+
+    def move(self):
+        self.rect.move_ip(self.new_speed_x, self.new_speed_y)
+
+    def update(self):
+        if self.timer_bullet.is_next_stop_reached():
+            self.kill()
+
+        self.move()
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
+class Asteroid(pygame.sprite.DirtySprite):
     def __init__(self, filename):
         super().__init__()
         self.image = pygame.image.load(os.path.join(Settings.path_image, filename)).convert_alpha()
@@ -185,7 +230,6 @@ class Game(object):
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_RIGHT]:
             self.spaceship.sprite.rotate_right()
-
         if pressed[pygame.K_LEFT]:
             self.spaceship.sprite.rotate_left()
         if pressed[pygame.K_UP]:
@@ -197,6 +241,8 @@ class Game(object):
                     self.running = False
                 if event.key == pygame.K_p:
                     self.pause = not self.pause
+                if event.key == pygame.K_RETURN:
+                    self.spaceship.sprite.shoot()
                 
     def update(self):
         self.asteroids.update()
