@@ -90,7 +90,8 @@ class Spaceship(pygame.sprite.DirtySprite):
             print('Spaceship hat einen Asteroiden berührt!')
 
     def shoot(self):
-        self.bullets.add(Bullet("5.png", self.rect.center, self.rotation))
+        if len(self.bullets) < 10:
+            self.bullets.add(Bullet("5.png", self.rect.center, self.rotation))
 
     def update(self):
         self.speed_up()
